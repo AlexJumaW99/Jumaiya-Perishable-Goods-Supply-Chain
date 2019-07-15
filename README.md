@@ -1,2 +1,3 @@
-# Jumaiya-Perishable-Goods-Supply-Chain
-A Block-Chain business network application aimed at increasing transparency and accountability in a perishable goods supply chain. 
+# jumaiya-perishable-supply-chain
+
+A supply chain bna that allows seamless transaction of perishable farm produce between the Farmer and Retailer. Whilst allowing transparency and accountability in the supply chain.

@@ -1,0 +1,258 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Write your model definitions here
+ */
+
+namespace org.perishable
+
+//Let's stay away from concepts for now
+
+abstract participant businessPerson identified by BiD{
+  o String BiD
+
+  //Address 
+  o String Country 
+  o String County 
+  o String City optional
+  o String Street 
+  
+  //Contact Info
+  o String Phone_No regex = /[+][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]/
+  o String Email
+  o String Postal_Address
+
+  o Double Account_Balance
+
+}
+
+participant Farmer extends businessPerson{
+  o String FName
+  o String LName
+  o String Farmer_Id
+  o String Company optional 
+  o String SACCO optional 
+}
+
+participant Retailer extends businessPerson{
+  o String Company
+  o String Retailer_Id
+}
+
+participant Transporter identified by Tid{
+  o String Tid
+  o String FName
+  o String LName
+  o String National_ID_No
+  o String Company 
+}
+
+asset Produce identified by Produce_Id{
+  o String Produce_Id
+  o Produce_type Produce_Type
+  o String Produce_SubType
+  o Double Unit_Price
+  o Integer Stock
+  --> Farmer farmer_Id 
+}
+
+enum Produce_type{
+  o APPLE 
+  o PEAR
+  o PEACH 
+  o TOMATO
+  o ORANGE
+}
+
+asset Order identified by Order_Id{
+  o String Order_Id
+  o Double Unit_Count
+  o Order_status Order_Status default = "CREATED"
+  o Feedback FeedBack default = "REQUESTED"
+
+  //When the shipment should be delivered by
+  o DateTime Arrival_DateTime
+
+  //The maximum and minimum temperature that the Produce SHOULD be shipped in
+  o Double MaxTemp 
+  o Double MinTemp 
+
+  // Penalty Multiplier for each Temperature above or below the Max or Min temp respectively 
+  o Double PenaltyMultiplier 
+
+  --> Produce produce_Id
+  --> Farmer farmer_Id
+  --> Retailer retailer_Id
+  
+}
+
+enum Order_status{
+  o CREATED
+  o SENT 
+}
+
+enum Feedback{
+  o REQUESTED
+  o ACCEPTED
+  o REJECTED
+}
+
+asset Invoice identified by Invoice_Id{
+  o String Invoice_Id
+  o Invoice_status Invoice_Status default = "CREATED"
+  o String Description
+  o Double Boxes
+  o Double Quantity_Per_Box
+  o Double Price_Per_Box
+  o Double Total
+
+  --> Produce produce_id
+  --> Order order_Id
+  --> Farmer farmer_Id
+  --> Retailer retailer_id
+}
+
+enum Invoice_status{
+  o CREATED
+  o SENT
+}
+
+asset Shipment identified by Shipment_Id{
+  o String Shipment_Id
+  o Shipment_status Shipment_Status default = "CREATED"
+
+  //The maximum and minimum temperature that the Produce was ACTUALLY shipped in
+  o Double MaxShipTemp
+  o Double MinShipTemp
+
+  //The arrival date and time of the Shipment
+  o DateTime Arrival_dateTime 
+
+  --> Order order_Id
+  --> Invoice invoice_Id
+  --> Farmer farmer_Id
+  --> Retailer retailer_Id
+
+}
+
+enum Shipment_status{
+  o CREATED
+  o IN_TRANSIT
+  o RECEIVED 
+  o INVALID
+}
+
+/*
+transaction MakeOrder{
+  o String order_Id
+  o Integer unit_Count
+  o DateTime arrival_Datetime 
+  o Double maxTemp
+  o Double minTemp 
+  o Double penaltyMultiplier
+  o String produce_id 
+  o String farmer_id
+  o String retailer_id  
+}
+*/
+
+/*
+transaction MakeInvoice{
+  o String invoice_id
+  o String description
+  o Integer boxes
+  o Integer quantity_Per_Box
+  o String box_Price
+  o String total
+
+  o String order_id
+}
+*/
+
+event OrderMade{
+
+}
+
+event OrderVerdict{
+
+}
+
+event InvoiceMade{
+
+}
+
+event invoiceReceived{
+
+}
+
+transaction SendOrder{
+  --> Order order_id
+}
+
+transaction ReceiveOrder{
+  o feedBack FeedBack
+  --> Order order_id
+}
+
+enum feedBack{
+  o ACCEPTED
+  o REJECTED
+}
+
+transaction SendInvoice{
+  --> Invoice invoice_id 
+}
+
+transaction InvoiceReceived{
+  o Verdict verdict default = "ACCEPT"
+
+  --> Invoice invoice_id
+  --> Farmer farmer_id
+  --> Retailer retailer_id
+  --> Produce produce_id
+}
+
+enum Verdict{
+  o ACCEPT 
+  o DECLINE
+}
+
+transaction DispatchShipment{
+  --> Shipment shipment_id 
+  --> Transporter transporter_id
+  --> Farmer farmer_id
+  --> Retailer retailer_id 
+
+}
+
+transaction ReceiveShipment{
+  --> Shipment shipment_id 
+  --> Transporter transporter_id
+  --> Farmer farmer_id
+  --> Retailer retailer_id
+  --> Order order_id
+
+  o String Comments optional
+}
+
+
+
+
+
+
+
+
+
+
